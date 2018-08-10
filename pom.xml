@@ -25,9 +25,9 @@
 		<distribution.management.release.id>artifactory-local</distribution.management.release.id>
 		<distribution.management.release.url>http://localhost:8081/artifactory/libs-release-local</distribution.management.release.url>
 		<!-- KUBERNETES -->
-		<docker.image.prefix>schoolpipelines</docker.image.prefix>
-		<docker.server.id>docker-repo</docker.server.id>
-		<docker.registry.url>hub.docker.com</docker.registry.url>
+		<DOCKER_REGISTRY_ORGANIZATION>elipcero</DOCKER_REGISTRY_ORGANIZATION>
+		<DOCKER_SERVER_ID>docker-repo</DOCKER_SERVER_ID>
+		<DOCKER_REGISTRY_URL>https://index.docker.io/v1/</DOCKER_REGISTRY_URL>
 	</properties>
 
 	<distributionManagement>
@@ -96,8 +96,9 @@
 						<artifactId>docker-maven-plugin</artifactId>
 						<version>1.1.1</version>
 						<configuration>
-							<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
-							<baseImage>frolvlad/alpine-oraclejdk8:slim</baseImage>
+							<serverId>${DOCKER_SERVER_ID}</serverId>
+							<registryUrl>${DOCKER_REGISTRY_URL}</registryUrl>
+							<imageName>${DOCKER_REGISTRY_ORGANIZATION}/${project.artifactId}</imageName>							<baseImage>frolvlad/alpine-oraclejdk8:slim</baseImage>
 							<entryPoint>["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -jar /${project.build.finalName}.jar"]</entryPoint>
 							<resources>
 								<resource>
