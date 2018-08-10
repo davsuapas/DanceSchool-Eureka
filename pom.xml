@@ -22,7 +22,21 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<spring-cloud.version>Finchley.RC2</spring-cloud.version>
+		<distribution.management.release.id>artifactory-local</distribution.management.release.id>
+		<distribution.management.release.url>http://localhost:8081/artifactory/libs-release-local</distribution.management.release.url>
+		<!-- KUBERNETES -->
+		<docker.image.prefix>schoolpipelines</docker.image.prefix>
+		<docker.server.id>docker-repo</docker.server.id>
+		<docker.registry.url>hub.docker.com</docker.registry.url>
 	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>${distribution.management.release.id}</id>
+			<name>Spring Milestone Repository</name>
+			<url>${distribution.management.release.url}</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>
@@ -69,5 +83,48 @@
 		</repository>
 	</repositories>
 
+	<profiles>
+		<profile>
+			<id>docker</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.spotify</groupId>
+						<artifactId>docker-maven-plugin</artifactId>
+						<version>1.1.1</version>
+						<configuration>
+							<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+							<baseImage>frolvlad/alpine-oraclejdk8:slim</baseImage>
+							<entryPoint>["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -jar /${project.build.finalName}.jar"]</entryPoint>
+							<resources>
+								<resource>
+									<targetPath>/</targetPath>
+									<directory>${project.build.directory}</directory>
+									<include>${project.build.finalName}.jar</include>
+								</resource>
+							</resources>
+							<serverId>${docker.server.id}</serverId>
+							<imageTags>
+								<imageTag>${project.version}</imageTag>
+								<imageTag>latest</imageTag>
+							</imageTags>
+						</configuration>
+						<executions>
+							<execution>
+								<id>push-image</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>push</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
